@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Scanner</title>
+  <link rel="stylesheet" href="styles.css">
+    <styles>
+        
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+}
+
+.scanner-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+video {
+  width: 100%;
+  border-radius: 8px;
+}
+
+#scan-result {
+  margin-top: 10px;
+  font-size: 1.2em;
+  color: #333;
+}
+</styles>
+</head>
+<body>
+  <div class="scanner-container">
+    <video id="preview"></video>
+    <div id="scan-result">Scanning...</div>
+  </div>
+
+  <!-- Include Instascan library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/instascan/1.0.0/instascan.min.js"></script>
+  <script src="script.js"></script>
+<script>
+// Wait for the page to load
+document.addEventListener("DOMContentLoaded", function () {
+  // Select elements for video preview and scan result
+  const videoElement = document.getElementById("preview");
+  const scanResult = document.getElementById("scan-result");
+
+  // Set up Instascan
+  const scanner = new Instascan.Scanner({ video: videoElement });
+
+  // When a QR code is detected, display its content
+  scanner.addListener("scan", function (content) {
+    scanResult.textContent = `Scanned Content: ${content}`;
+  });
+
+  // Start the camera and scanner
+  Instascan.Camera.getCameras()
+    .then(function (cameras) {
+      if (cameras.length > 0) {
+        scanner.start(cameras[0]);
+      } else {
+        scanResult.textContent = "No cameras found.";
+      }
+    })
+    .catch(function (error) {
+      console.error(error);
+      scanResult.textContent = "Camera error: " + error;
+    });
+});
+</script>
+</body>
+</html>
