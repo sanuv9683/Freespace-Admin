@@ -3,103 +3,178 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Device Data Manager</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://apis.google.com/js/api.js"></script>
+  <title>Google Sheets CRUD</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<div class="container my-5">
-  <h1 class="text-center mb-4">Device Data Manager</h1>
+<div class="container mt-4">
+  <h2>Manage Device Data</h2>
 
-  <!-- Form to Enter Marker ID and Device ID -->
-  <form id="dataForm" class="mb-4">
-    <div class="row">
-      <div class="col-md-5">
-        <input type="text" id="markerId" class="form-control" placeholder="Enter Marker ID" required>
-      </div>
-      <div class="col-md-5">
-        <input type="text" id="deviceId" class="form-control" placeholder="Enter Device ID" required>
-      </div>
-      <div class="col-md-2">
-        <button type="button" class="btn btn-primary w-100" onclick="addData()">Add Entry</button>
-      </div>
+  <!-- Sign-In Button -->
+  <button class="btn btn-primary" onclick="authenticate()">Sign In with Google</button>
+
+  <form id="deviceForm" class="mt-3">
+    <div class="mb-3">
+      <label for="markerID" class="form-label">Marker ID</label>
+      <input type="text" id="markerID" class="form-control" required>
     </div>
+    <div class="mb-3">
+      <label for="deviceID" class="form-label">Device ID</label>
+      <input type="text" id="deviceID" class="form-control" required>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="addRecord()">Add</button>
   </form>
 
-  <!-- Table to Display Data -->
-  <table class="table table-striped" id="dataTable">
-    <thead class="table-dark">
+  <h3 class="mt-4">Records</h3>
+  <table class="table" id="recordsTable">
+    <thead>
     <tr>
       <th>Marker ID</th>
       <th>Device ID</th>
       <th>Actions</th>
     </tr>
     </thead>
-    <tbody id="dataBody">
-    <!-- Data rows will be dynamically added here -->
-    </tbody>
+    <tbody></tbody>
   </table>
 </div>
+  <!-- Load Google API client library -->
+  <script src="https://apis.google.com/js/api.js"></script>
 
 <script>
+  const API_KEY='AIzaSyCsWAr78ZezVoY0xgLQj8K-K6dJuR_McSc';
+  const CLIENT_ID='936125713810-vllc3mt30976jfllsg3i40ak55lofvl1.apps.googleusercontent.com';
+  const SPREAD_SHEET_ID='1Mifn_2UvP5N7cxY9p0guNeU97yDHGBTCRrdT9bXY-I8';
 
-  const CLIENT_ID = '936125713810-vllc3mt30976jfllsg3i40ak55lofvl1.apps.googleusercontent.com';
-  const API_KEY = 'AIzaSyCsWAr78ZezVoY0xgLQj8K-K6dJuR_McSc';
-  const SHEET_ID = '1Mifn_2UvP5N7cxY9p0guNeU97yDHGBTCRrdT9bXY-I8';
-  const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
-  const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
-
-  function handleClientLoad() {
-    gapi.load('client:auth2', initClient);
+  // Load the Google API client library
+  function initializeGapi() {
+    gapi.load("client:auth2", initAuth);
   }
 
-  function initClient() {
-    gapi.client.init({
-      apiKey: API_KEY,
-      clientId: CLIENT_ID,
-      discoveryDocs: [DISCOVERY_DOC],
-      scope: SCOPES,
+  // Initialize the authentication client
+  function initAuth() {
+    gapi.auth2.init({
+      client_id: CLIENT_ID
     }).then(() => {
-      gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-      updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-    });
+      const authInstance = gapi.auth2.getAuthInstance();
+      if (authInstance.isSignedIn.get()) {
+        loadClient();  // Load the API client if already signed in
+        loadRecords(); // Load records if authenticated
+      }
+    }).catch((error) => console.error("Error initializing gapi.auth2", error));
   }
 
-  function updateSigninStatus(isSignedIn) {
-    if (isSignedIn) {
-      fetchData();
+  // Authenticate the user and then load the client
+  function authenticate() {
+    const authInstance = gapi.auth2.getAuthInstance();
+    if (authInstance) {
+      authInstance.signIn({scope: "https://www.googleapis.com/auth/spreadsheets"})
+              .then(() => {
+                console.log("Sign-in successful");
+                loadClient();  // Call loadClient after successful sign-in
+              })
+              .catch((err) => console.error("Error signing in", err));
     } else {
-      gapi.auth2.getAuthInstance().signIn();
+      console.error("Google Auth instance is not available.");
     }
   }
 
-  function fetchData() {
-    gapi.client.sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: 'Sheet1!A:B',
-    }).then(response => {
-      displayData(response.result.values);
+  // Load the Google Sheets API client
+  function loadClient() {
+    gapi.client.load("https://sheets.googleapis.com/$discovery/rest?version=v4")
+            .then(() => console.log("GAPI client loaded for API"),
+                    (err) => console.error("Error loading GAPI client for API", err));
+  }
+
+  // Get the current auth token
+  function getAuthToken() {
+    const authInstance = gapi.auth2.getAuthInstance();
+    return authInstance.currentUser.get().getAuthResponse().access_token;
+  }
+
+  // Add a new record to the Google Sheet with Authorization
+  async function addRecord() {
+    const markerID = document.getElementById("markerID").value;
+    const deviceID = document.getElementById("deviceID").value;
+
+    if (markerID && deviceID) {
+      try {
+        const authInstance = gapi.auth2.getAuthInstance();
+        if (!authInstance.isSignedIn.get()) {
+          await authenticate();  // Ensure the user is authenticated
+        }
+
+        const token = getAuthToken();  // Get the auth token
+
+        await gapi.client.request({
+          path: `https://sheets.googleapis.com/v4/spreadsheets/YOUR_SPREADSHEET_ID/values/Sheet1!A:B:append`,
+          method: "POST",
+          params: {
+            valueInputOption: "USER_ENTERED"
+          },
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          body: {
+            values: [[markerID, deviceID]]
+          }
+        });
+
+        loadRecords();  // Refresh the records after adding
+      } catch (error) {
+        console.error("Error adding record:", error);
+      }
+    }
+  }
+
+  // Initialize the GAPI library
+  initializeGapi();
+
+
+
+
+
+
+
+  async function loadRecords() {
+    try {
+      const response = await gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: "1Mifn_2UvP5N7cxY9p0guNeU97yDHGBTCRrdT9bXY-I8",
+        range: "Sheet1!A:B"
+      });
+      const records = response.result.values || [];
+      const tableBody = document.querySelector("#recordsTable tbody");
+      tableBody.innerHTML = "";
+
+      records.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+                <td>${row[0]}</td>
+                <td>${row[1]}</td>
+                <td>
+                    <button onclick="editRecord(${index})" class="btn btn-sm btn-warning">Edit</button>
+                    <button onclick="deleteRecord(${index})" class="btn btn-sm btn-danger">Delete</button>
+                </td>
+            `;
+        tableBody.appendChild(tr);
+      });
+    } catch (error) {
+      console.error("Error loading records:", error);
+    }
+  }
+
+
+    function initClient() {
+    gapi.client.init({
+      apiKey: "AIzaSyCsWAr78ZezVoY0xgLQj8K-K6dJuR_McSc",
+      discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+    }).then(() => {
+      loadRecords();
     });
   }
 
-  function addData() {
-    const markerId = document.getElementById('markerId').value;
-    const deviceId = document.getElementById('deviceId').value;
+    gapi.load("client", initClient);
 
-    gapi.client.sheets.spreadsheets.values.append({
-      spreadsheetId: SHEET_ID,
-      range: 'Sheet1!A:B',
-      valueInputOption: 'RAW',
-      resource: {
-        values: [[markerId, deviceId]],
-      },
-    }).then(response => {
-      fetchData();
-      document.getElementById('dataForm').reset();
-    });
-  }
 
-  window.onload = handleClientLoad;
 
 </script>
 </body>
