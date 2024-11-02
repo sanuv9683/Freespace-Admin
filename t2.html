@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Data Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Manage Data Offline</h1>
+
+    <!-- Form Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="dataForm">
+                <div class="mb-3">
+                    <label for="markerId" class="form-label">Marker ID</label>
+                    <input type="text" class="form-control" id="markerId" required>
+                </div>
+                <div class="mb-3">
+                    <label for="resourceId" class="form-label">Resource ID</label>
+                    <input type="text" class="form-control" id="resourceId" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Entry</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Table Section -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Data</h5>
+            <table class="table table-bordered" id="dataTable">
+                <thead>
+                <tr>
+                    <th>Marker ID</th>
+                    <th>Resource ID</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Dynamic Data Rows Will Be Inserted Here -->
+                </tbody>
+            </table>
+            <button class="btn btn-success mt-3" id="downloadBtn">Export to Excel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    let db;
+    let data = [];
+
+    // Initialize IndexedDB
+    function initDatabase() {
+        const request = indexedDB.open("DataDB", 1);
+
+        request.onerror = (event) => {
+            console.error("Database error:", event.target.errorCode);
+        };
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            loadData();
+        };
+
+        request.onupgradeneeded = (event) => {
+            db = event.target.result;
+            db.createObjectStore("data", { keyPath: "id", autoIncrement: true });
+        };
+    }
+
+    // Load Data from IndexedDB
+    function loadData() {
+        const transaction = db.transaction(["data"], "readonly");
+        const objectStore = transaction.objectStore("data");
+
+        const request = objectStore.getAll();
+        request.onsuccess = (event) => {
+            data = event.target.result;
+            renderTable();
+        };
+    }
+
+    // Render Table
+    function renderTable() {
+        const tableBody = document.getElementById("dataTable").getElementsByTagName("tbody")[0];
+        tableBody.innerHTML = '';
+
+        data.forEach((item, index) => {
+            const row = document.createElement("tr");
+
+            const markerCell = document.createElement("td");
+            markerCell.innerText = item.markerId;
+            row.appendChild(markerCell);
+
+            const resourceCell = document.createElement("td");
+            resourceCell.innerText = item.resourceId;
+            row.appendChild(resourceCell);
+
+            const actionsCell = document.createElement("td");
+            actionsCell.innerHTML = `
+      <button class="btn btn-warning btn-sm" onclick="editEntry(${item.id})">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteEntry(${item.id})">Delete</button>
+    `;
+            row.appendChild(actionsCell);
+
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Add Entry
+    document.getElementById("dataForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        const markerId = document.getElementById("markerId").value;
+        const resourceId = document.getElementById("resourceId").value;
+
+        const transaction = db.transaction(["data"], "readwrite");
+        const objectStore = transaction.objectStore("data");
+        objectStore.add({ markerId, resourceId });
+
+        transaction.oncomplete = () => {
+            document.getElementById("markerId").value = '';
+            document.getElementById("resourceId").value = '';
+            loadData();
+        };
+    });
+
+    // Edit Entry
+    function editEntry(id) {
+        const item = data.find(entry => entry.id === id);
+        document.getElementById("markerId").value = item.markerId;
+        document.getElementById("resourceId").value = item.resourceId;
+
+        deleteEntry(id);
+    }
+
+    // Delete Entry
+    function deleteEntry(id) {
+        const transaction = db.transaction(["data"], "readwrite");
+        const objectStore = transaction.objectStore("data");
+        objectStore.delete(id);
+
+        transaction.oncomplete = () => {
+            loadData();
+        };
+    }
+
+    // Export Data to Excel
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+        const worksheet = XLSX.utils.json_to_sheet(data.map(item => ({ markerId: item.markerId, resourceId: item.resourceId })));
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+
+        XLSX.writeFile(workbook, "data.xlsx");
+    });
+
+    // Initialize Database
+    initDatabase();
+
+</script>
+</body>
+</html>
