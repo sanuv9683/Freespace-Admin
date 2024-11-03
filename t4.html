@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Google Sheets Data Entry</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-5">
@@ -12,109 +12,37 @@
     <form id="dataForm">
         <div class="form-group">
             <label for="markerID">Marker ID</label>
-            <input type="text" class="form-control" id="markerID" required>
+            <input class="form-control" id="markerID" required type="text">
         </div>
         <div class="form-group">
             <label for="deviceID">Device ID</label>
-            <input type="text" class="form-control" id="deviceID" required>
+            <input class="form-control" id="deviceID" required type="text">
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button class="btn btn-primary" type="submit">Submit</button>
+        <button class="btn btn-warning" id="btnUpdate" type="button">Update</button>
     </form>
-    <div id="response" class="mt-3"></div>
+    <div class="mt-3" id="response"></div>
+
+    <h3 class="mt-4">Records</h3>
+    <table class="table" id="recordsTable">
+        <thead>
+        <tr>
+            <th>Marker ID</th>
+            <th>Device ID</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 </div>
 
 <!-- Google Identity Services library -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script async defer src="https://accounts.google.com/gsi/client"></script>
 <!-- Google API client library -->
-<script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-
-<!--<script>-->
-<!--    // Your Google API Client ID and API Key-->
-<!--    const CLIENT_ID = '936125713810-vllc3mt30976jfllsg3i40ak55lofvl1.apps.googleusercontent.com';-->
-<!--    const API_KEY = 'AIzaSyCsWAr78ZezVoY0xgLQj8K-K6dJuR_McSc';-->
-
-<!--    // Google Sheets ID and range where data will be saved-->
-<!--    const SPREADSHEET_ID = '1Mifn_2UvP5N7cxY9p0guNeU97yDHGBTCRrdT9bXY-I8';-->
-<!--    const SHEET_NAME = 'Sheet1';-->
-
-<!--    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';-->
-
-<!--    // Load the auth2 library-->
-<!--    function handleClientLoad() {-->
-<!--        gapi.load('client:auth2', initClient);-->
-<!--    }-->
-
-<!--    // Initialize the API client library and set up sign-in state listeners-->
-<!--    function initClient() {-->
-<!--        gapi.client.init({-->
-<!--            apiKey: API_KEY,-->
-<!--            clientId: CLIENT_ID,-->
-<!--            scope: SCOPES-->
-<!--        }).then(() => {-->
-<!--            console.log("GAPI client initialized.");-->
-<!--        });-->
-<!--    }-->
-
-<!--    // Handle the form submission-->
-<!--    document.getElementById('dataForm').addEventListener('submit', async function (e) {-->
-<!--        e.preventDefault();-->
-
-<!--        const markerID = document.getElementById('markerID').value;-->
-<!--        const deviceID = document.getElementById('deviceID').value;-->
-
-<!--        if (gapi.auth2.getAuthInstance().isSignedIn.get()) {-->
-<!--            saveDataToSheet(markerID, deviceID);-->
-<!--        } else {-->
-<!--            gapi.auth2.getAuthInstance().signIn().then(() => {-->
-<!--                saveDataToSheet(markerID, deviceID);-->
-<!--            });-->
-<!--        }-->
-<!--    });-->
-
-<!--    // Function to save data to Google Sheets-->
-<!--    function saveDataToSheet(markerID, deviceID) {-->
-<!--        const params = {-->
-<!--            spreadsheetId: SPREADSHEET_ID,-->
-<!--            range: `${SHEET_NAME}!A:B`,-->
-<!--            valueInputOption: 'USER_ENTERED'-->
-<!--        };-->
-
-<!--        const valueRangeBody = {-->
-<!--            majorDimension: "ROWS",-->
-<!--            values: [[markerID, deviceID]]-->
-<!--        };-->
-
-<!--        gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody)-->
-<!--            .then(response => {-->
-<!--                if (response.status === 200) {-->
-<!--                    document.getElementById('response').innerHTML = `<div class="alert alert-success">Data saved successfully!</div>`;-->
-<!--                    document.getElementById('dataForm').reset();-->
-<!--                } else {-->
-<!--                    document.getElementById('response').innerHTML = `<div class="alert alert-danger">Failed to save data.</div>`;-->
-<!--                }-->
-<!--            }, error => {-->
-<!--                document.getElementById('response').innerHTML = `<div class="alert alert-danger">Error: ${error.result.error.message}</div>`;-->
-<!--            });-->
-<!--    }-->
-
-<!--    // Load the client on window load-->
-<!--    window.onload = function () {-->
-<!--        handleClientLoad();-->
-<!--    };-->
-
-<!--</script>-->
+<script onload="gapiLoaded()" src="https://apis.google.com/js/api.js"></script>
+<script src="dist/js/values.js"></script>
 
 <script>
-    // Your Google API Client ID and API Key
-    const CLIENT_ID = '936125713810-vllc3mt30976jfllsg3i40ak55lofvl1.apps.googleusercontent.com';
-    const API_KEY = 'AIzaSyCsWAr78ZezVoY0xgLQj8K-K6dJuR_McSc';
-
-    // Google Sheets ID and range where data will be saved
-    const SPREADSHEET_ID = '1Mifn_2UvP5N7cxY9p0guNeU97yDHGBTCRrdT9bXY-I8';
-    const SHEET_NAME = 'Sheet1';
-
-    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
-
     let tokenClient;
     let gapiInited = false;
     let gisInited = false;
@@ -131,6 +59,7 @@
         });
         gapiInited = true;
         maybeEnableForm();
+        await loadRecords();
     }
 
     function gisLoaded() {
@@ -158,7 +87,7 @@
                 }
                 await saveDataToSheet();
             };
-            tokenClient.requestAccessToken({ prompt: 'consent' });
+            tokenClient.requestAccessToken({prompt: 'consent'});
         } else {
             saveDataToSheet();
         }
@@ -182,6 +111,7 @@
         try {
             const response = await gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody);
             if (response.status === 200) {
+                await loadRecords();
                 document.getElementById('response').innerHTML = `<div class="alert alert-success">Data saved successfully!</div>`;
                 document.getElementById('dataForm').reset();
             }
@@ -190,11 +120,136 @@
         }
     }
 
+    // Save changes to Google Sheets
+    async function updateRow(markerID, deviceID, rowIndex) {
+
+
+        const params = {
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${SHEET_NAME}!A${rowIndex + 2}:B${rowIndex + 2}`,
+            valueInputOption: 'USER_ENTERED',
+        };
+
+        const valueRangeBody = {
+            majorDimension: 'ROWS',
+            values: [[markerID, deviceID]],
+        };
+
+        try {
+            const response = await gapi.client.sheets.spreadsheets.values.update(params, valueRangeBody);
+            if (response.status === 200) {
+                document.getElementById('response').innerHTML = `<div class="alert alert-success">Row updated successfully!</div>`;
+                await loadRecords(); // Refresh the data display
+            }
+        } catch (error) {
+            document.getElementById('response').innerHTML = `<div class="alert alert-danger">Error updating row: ${error.result.error.message}</div>`;
+        }
+    }
+
+
     // Load the GAPI and GIS libraries when the window loads
     window.onload = function () {
         gapiLoaded();
         gisLoaded();
     };
+
+    let indexID;
+
+    function editText(markerID, deviceID, index) {
+        document.getElementById('markerID').value = markerID;
+        document.getElementById('deviceID').value = deviceID;
+        indexID = index;
+    }
+
+    document.getElementById("btnUpdate").addEventListener("click", function () {
+        const markerID = document.getElementById('markerID').value;
+        const deviceID = document.getElementById('deviceID').value;
+        if (gapi.client.getToken() === null) {
+            tokenClient.callback = async (response) => {
+                if (response.error) {
+                    throw response;
+                }
+               await updateRow(markerID, deviceID, indexID);
+            };
+            tokenClient.requestAccessToken({prompt: 'consent'});
+        } else {
+            updateRow(markerID, deviceID, indexID);
+        }
+
+    });
+
+    async function loadRecords() {
+        try {
+            const response = await gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: "1Mifn_2UvP5N7cxY9p0guNeU97yDHGBTCRrdT9bXY-I8",
+                range: "Sheet1!A2:B"
+            });
+            const records = response.result.values || [];
+            const tableBody = document.querySelector("#recordsTable tbody");
+            tableBody.innerHTML = "";
+
+            records.forEach((row, index) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                <td>${row[0]}</td>
+                <td>${row[1]}</td>
+                <td>
+                    <button onclick="editText(${row[0]},${row[1]},${index})" class="btn btn-sm btn-warning">Edit</button>
+                    <button onclick="deleteRow(${index})" class="btn btn-sm btn-danger">Delete</button>
+                </td>
+            `;
+                tableBody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error("Error loading records:", error);
+        }
+    }
+
+    // Delete a row from Google Sheets
+    async function deleteRow(rowIndex) {
+        if (gapi.client.getToken() === null) {
+            tokenClient.callback = async (response) => {
+                if (response.error) {
+                    throw response;
+                }
+                await deleteSelectedRow(rowIndex + 2);
+            };
+            tokenClient.requestAccessToken({prompt: 'consent'});
+        } else {
+            deleteSelectedRow(rowIndex + 2);
+        }
+
+
+    }
+
+    async function deleteSelectedRow(rowIndex) {
+        const requests = [
+            {
+                deleteDimension: {
+                    range: {
+                        sheetId: 0,  // Sheet ID (use 0 for the first sheet or get the actual ID if not the first sheet)
+                        dimension: 'ROWS',
+                        startIndex: rowIndex - 1,  // Convert to zero-based index
+                        endIndex: rowIndex
+                    }
+                }
+            }
+        ];
+
+        try {
+            await gapi.client.sheets.spreadsheets.batchUpdate({
+                spreadsheetId: SPREADSHEET_ID,
+                resource: {
+                    requests: requests
+                }
+            });
+            document.getElementById('response').innerHTML = `<div class="alert alert-success">Row deleted successfully!</div>`;
+            await loadRecords(); // Refresh the data display
+        } catch (error) {
+            document.getElementById('response').innerHTML = `<div class="alert alert-danger">Error deleting row: ${error.result.error.message}</div>`;
+        }
+    }
+
 
 </script>
 </body>
