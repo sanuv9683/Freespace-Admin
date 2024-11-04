@@ -5,10 +5,12 @@
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <title>FreeSpace | Toolkit</title><!--begin::Primary Meta Tags-->
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="FreeSpace" name="title">
-    <meta content="ColorlibHQ" name="author">
-    <meta content="FreeSpace toolkit" name="description">
-    <meta content="" name="keywords"><!--end::Primary Meta Tags--><!--begin::Fonts-->
+    <meta content="FreeSpace ToolKit" name="title">
+    <meta content="Sanu Vithanage" name="author">
+    <meta content="FreeSpace Tool is a free web application designed to empower engineers in achieving operational goals efficiently and effectively."
+          name="description">
+    <meta content="FreeSpace Tool, free web application, engineering software, operational efficiency" name="keywords">
+    <!--end::Primary Meta Tags--><!--begin::Fonts-->
     <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
           integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q=" rel="stylesheet"><!--end::Fonts-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
@@ -40,19 +42,74 @@
     </nav> <!--end::Header--> <!--begin::Sidebar-->
 
     <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark"> <!--begin::Sidebar Brand-->
-        <div class="sidebar-brand"> <!--begin::Brand Link--> <a class="brand-link" href="./index.html">
-            <!--begin::Brand Image--> <img alt="FreeSpace Logo" class="brand-image opacity-75 shadow"
-                                           src="dist/assets/img/AdminLTELogo.png"> <!--end::Brand Image-->
-            <!--begin::Brand Text--> <span class="brand-text fw-light">FreeSpace</span> <!--end::Brand Text--> </a>
-            <!--end::Brand Link--> </div> <!--end::Sidebar Brand--> <!--begin::Sidebar Wrapper-->
+        <div class="sidebar-brand">
+            <!--begin::Brand Link-->
+            <a class="brand-link" href="index.html">
+                <!--begin::Brand Image-->
+                <img alt="FreeSpace Logo" class="brand-image opacity-75 shadow" src="dist/assets/img/AdminLTELogo.png">
+                <!--end::Brand Image-->
+                <!--begin::Brand Text-->
+                <span class="brand-text fw-light">FreeSpace</span>
+                <!--end::Brand Text-->
+            </a>
+        </div> <!--end::Sidebar Brand--> <!--begin::Sidebar Wrapper-->
         <div class="sidebar-wrapper">
             <nav class="mt-2"> <!--begin::Sidebar Menu-->
                 <ul class="nav sidebar-menu flex-column" data-accordion="false" data-lte-toggle="treeview" role="menu">
-                    <li class="nav-item menu-open"><a class="nav-link active" href="#"> <i
-                            class="nav-icon bi bi-speedometer"></i>
-                        <p>ONS Device Info</p>
-                    </a>
+                    <li class="nav-item menu-open">
+                        <a class="nav-link active" href="index.html">
+                            <i class="nav-icon bi bi-ui-checks-grid"></i>
+                            <p>ONS Scan</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon bi bi-clipboard-fill"></i>
+                            <p>
+                                Assign Marker IDS
+                                <i class="nav-arrow bi bi-chevron-right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="nav-icon bi bi-box-arrow-in-right"></i>
+                                    <p>
+                                        Assign New IDS
+                                        <i class="nav-arrow bi bi-chevron-right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="manage_with_google_sheet.html">
+                                            <i class="nav-icon bi bi-circle"></i>
+                                            <p>With Google Sheets</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="manage_desktop.html">
+                                            <i class="nav-icon bi bi-circle"></i>
+                                            <p>With Desktop App</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="mobile_offiline.html">
+                                            <i class="nav-icon bi bi-circle"></i>
+                                            <p>With Mobile Offline</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="privacy_policy.html">
+                            <i class="nav-icon bi bi-patch-check-fill"></i>
+                            <p>Privacy Policy</p>
+                        </a>
+                    </li>
                 </ul> <!--end::Sidebar Menu-->
+
             </nav>
         </div> <!--end::Sidebar Wrapper-->
     </aside> <!--end::Sidebar--> <!--begin::App Main-->
@@ -66,7 +123,7 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
                             <li aria-current="page" class="breadcrumb-item active">
                                 Dashboard
                             </li>
@@ -77,6 +134,40 @@
         </div> <!--end::App Content Header--> <!--begin::App Content-->
         <div class="app-content"> <!--begin::Container-->
             <div class="container-fluid"> <!--begin::Row-->
+
+                <div class="row">
+                    <div class="col-12">
+
+
+                        <h4>Enter Device Data</h4>
+                        <form id="dataForm">
+                            <div class="form-group">
+                                <label for="markerID">Marker ID</label>
+                                <input class="form-control" id="markerID" required type="text">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="deviceID">Device ID</label>
+                                <input class="form-control" id="deviceID" required type="text">
+                            </div>
+                            <button class="btn btn-primary" type="submit">Submit</button>
+                            <button class="btn btn-warning" id="btnUpdate" type="button">Update</button>
+                        </form>
+                        <div class="mt-3" id="response"></div>
+
+                        <h3 class="mt-4">Records</h3>
+                        <table class="table" id="recordsTable">
+                            <thead>
+                            <tr>
+                                <th>Marker ID</th>
+                                <th>Device ID</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
 
             </div> <!--end::Container-->
         </div> <!--end::App Content-->
@@ -153,13 +244,229 @@
         integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8="
         src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"></script>
 <!-- ChartJS -->
-
 <script crossorigin="anonymous"
         integrity="sha256-/t1nN2956BT869E6H4V1dnt0X5pAQHPytli+1nTZm2Y="
         src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
 <script crossorigin="anonymous"
         integrity="sha256-XPpPaZlU8S/HWf7FZLAncLg2SAkP8ScUTII89x9D3lY="
         src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"></script>
+
+<!-- Google Identity Services library -->
+<script async defer src="https://accounts.google.com/gsi/client"></script>
+<!-- Google API client library -->
+<script onload="gapiLoaded()" src="https://apis.google.com/js/api.js"></script>
+<script src="dist/js/values.js"></script>
+
+<script>
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
+
+    // Load the GAPI client library
+    function gapiLoaded() {
+        gapi.load('client', initializeGapiClient);
+    }
+
+    async function initializeGapiClient() {
+        await gapi.client.init({
+            apiKey: API_KEY,
+            discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+        });
+        gapiInited = true;
+        maybeEnableForm();
+        await loadRecords();
+    }
+
+    function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: '', // defined later
+        });
+        gisInited = true;
+        maybeEnableForm();
+    }
+
+    function maybeEnableForm() {
+        if (gapiInited && gisInited) {
+            document.getElementById('dataForm').style.display = 'block';
+        }
+    }
+
+    document.getElementById('dataForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (gapi.client.getToken() === null) {
+            tokenClient.callback = async (response) => {
+                if (response.error) {
+                    throw response;
+                }
+                await saveDataToSheet();
+            };
+            tokenClient.requestAccessToken({prompt: 'consent'});
+        } else {
+            saveDataToSheet();
+        }
+    });
+
+    async function saveDataToSheet() {
+        const markerID = document.getElementById('markerID').value;
+        const deviceID = document.getElementById('deviceID').value;
+
+        const params = {
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${SHEET_NAME}!A:B`,
+            valueInputOption: 'USER_ENTERED',
+        };
+
+        const valueRangeBody = {
+            majorDimension: "ROWS",
+            values: [[markerID, deviceID]],
+        };
+
+        try {
+            const response = await gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody);
+            if (response.status === 200) {
+                await loadRecords();
+                document.getElementById('response').innerHTML = `<div class="alert alert-success">Data saved successfully!</div>`;
+                document.getElementById('dataForm').reset();
+            }
+        } catch (error) {
+            document.getElementById('response').innerHTML = `<div class="alert alert-danger">Error: ${error.result.error.message}</div>`;
+        }
+    }
+
+    // Save changes to Google Sheets
+    async function updateRow(markerID, deviceID, rowIndex) {
+
+
+        const params = {
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${SHEET_NAME}!A${rowIndex + 2}:B${rowIndex + 2}`,
+            valueInputOption: 'USER_ENTERED',
+        };
+
+        const valueRangeBody = {
+            majorDimension: 'ROWS',
+            values: [[markerID, deviceID]],
+        };
+
+        try {
+            const response = await gapi.client.sheets.spreadsheets.values.update(params, valueRangeBody);
+            if (response.status === 200) {
+                document.getElementById('response').innerHTML = `<div class="alert alert-success">Row updated successfully!</div>`;
+                await loadRecords(); // Refresh the data display
+            }
+        } catch (error) {
+            document.getElementById('response').innerHTML = `<div class="alert alert-danger">Error updating row: ${error.result.error.message}</div>`;
+        }
+    }
+
+
+    // Load the GAPI and GIS libraries when the window loads
+    window.onload = function () {
+        gapiLoaded();
+        gisLoaded();
+    };
+
+    let indexID;
+
+    function editText(markerID, deviceID, index) {
+        document.getElementById('markerID').value = markerID;
+        document.getElementById('deviceID').value = deviceID;
+        indexID = index;
+    }
+
+    document.getElementById("btnUpdate").addEventListener("click", function () {
+        const markerID = document.getElementById('markerID').value;
+        const deviceID = document.getElementById('deviceID').value;
+        if (gapi.client.getToken() === null) {
+            tokenClient.callback = async (response) => {
+                if (response.error) {
+                    throw response;
+                }
+                await updateRow(markerID, deviceID, indexID);
+            };
+            tokenClient.requestAccessToken({prompt: 'consent'});
+        } else {
+            updateRow(markerID, deviceID, indexID);
+        }
+
+    });
+
+    async function loadRecords() {
+        try {
+            const response = await gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: "1Mifn_2UvP5N7cxY9p0guNeU97yDHGBTCRrdT9bXY-I8",
+                range: "Sheet1!A2:B"
+            });
+            const records = response.result.values || [];
+            const tableBody = document.querySelector("#recordsTable tbody");
+            tableBody.innerHTML = "";
+
+            records.forEach((row, index) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                <td>${row[0]}</td>
+                <td>${row[1]}</td>
+                <td>
+                    <button onclick="editText(${row[0]},${row[1]},${index})" class="btn btn-sm btn-warning">Edit</button>
+                    <button onclick="deleteRow(${index})" class="btn btn-sm btn-danger">Delete</button>
+                </td>
+            `;
+                tableBody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error("Error loading records:", error);
+        }
+    }
+
+    // Delete a row from Google Sheets
+    async function deleteRow(rowIndex) {
+        if (gapi.client.getToken() === null) {
+            tokenClient.callback = async (response) => {
+                if (response.error) {
+                    throw response;
+                }
+                await deleteSelectedRow(rowIndex + 2);
+            };
+            tokenClient.requestAccessToken({prompt: 'consent'});
+        } else {
+            deleteSelectedRow(rowIndex + 2);
+        }
+
+
+    }
+
+    async function deleteSelectedRow(rowIndex) {
+        const requests = [
+            {
+                deleteDimension: {
+                    range: {
+                        sheetId: 0,  // Sheet ID (use 0 for the first sheet or get the actual ID if not the first sheet)
+                        dimension: 'ROWS',
+                        startIndex: rowIndex - 1,  // Convert to zero-based index
+                        endIndex: rowIndex
+                    }
+                }
+            }
+        ];
+
+        try {
+            await gapi.client.sheets.spreadsheets.batchUpdate({
+                spreadsheetId: SPREADSHEET_ID,
+                resource: {
+                    requests: requests
+                }
+            });
+            document.getElementById('response').innerHTML = `<div class="alert alert-success">Row deleted successfully!</div>`;
+            await loadRecords(); // Refresh the data display
+        } catch (error) {
+            document.getElementById('response').innerHTML = `<div class="alert alert-danger">Error deleting row: ${error.result.error.message}</div>`;
+        }
+    }
+
+
+</script>
 
 </body><!--end::Body-->
 
